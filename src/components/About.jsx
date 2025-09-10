@@ -159,18 +159,7 @@ const About = () => {
               </div>
             </motion.div>
 
-            {/* CTA Button */}
-            <motion.button
-              className="bg-gradient-to-r from-teal-500 to-blue-600 text-white px-8 py-3 rounded-full font-medium hover:shadow-lg transition-all duration-300"
-              whileHover={{ 
-                scale: 1.05,
-                boxShadow: "0 20px 40px rgba(20, 184, 166, 0.3)"
-              }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              Let's Connect
-            </motion.button>
+            
           </motion.div>
         </motion.div>
       </div>
