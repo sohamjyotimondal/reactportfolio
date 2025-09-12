@@ -107,7 +107,7 @@ const Hero = () => {
 
   return (
     <>
-      {/* CSS for animated gradient and true glassmorphism */}
+      {/* CSS for animated gradient and improved glassmorphism */}
       <style jsx>{`
         @keyframes gradientMove {
           0% { background-position: 0% 50%; }
@@ -132,54 +132,54 @@ const Hero = () => {
           animation: gradientMove 8s ease-in-out infinite;
         }
 
-        .true-glass-teal-button {
-          /* Very transparent background - you can see through it! */
-          background: rgba(20, 184, 166, 0.08);
-          backdrop-filter: blur(25px) saturate(120%);
-          -webkit-backdrop-filter: blur(25px) saturate(120%);
+        .improved-glass-button {
+          /* Ultra transparent - true glassmorphism */
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(40px) saturate(180%);
+          -webkit-backdrop-filter: blur(40px) saturate(180%);
           
-          /* Subtle teal-tinted border */
-          border: 1px solid rgba(20, 184, 166, 0.2);
+          /* Subtle border for glass edge */
+          border: 1px solid rgba(255, 255, 255, 0.12);
           
-          /* White text for contrast */
-          color: white;
-          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+          /* White text with subtle shadow */
+          color: rgba(255, 255, 255, 0.9);
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           
           position: relative;
           overflow: hidden;
           
-          /* Minimal shadow - glass doesn't cast strong shadows */
+          /* Professional glass shadow */
           box-shadow: 
-            0 4px 16px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            0 8px 32px rgba(31, 38, 135, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
-        .true-glass-teal-button::before {
+        .improved-glass-button::before {
           content: '';
           position: absolute;
           top: 0;
           left: 0;
           right: 0;
           bottom: 0;
-          /* Very subtle gradient overlay */
-          background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, rgba(14, 165, 233, 0.05) 100%);
+          /* Minimal tint overlay */
+          background: linear-gradient(135deg, rgba(20, 184, 166, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
           z-index: -1;
         }
 
-        .true-glass-teal-button:hover {
-          /* Slightly more visible on hover but still very transparent */
-          background: rgba(20, 184, 166, 0.12);
-          border: 1px solid rgba(20, 184, 166, 0.3);
-          backdrop-filter: blur(30px) saturate(130%);
-          -webkit-backdrop-filter: blur(30px) saturate(130%);
+        .improved-glass-button:hover {
+          /* Slightly more visible on hover */
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          backdrop-filter: blur(40px) saturate(200%);
+          -webkit-backdrop-filter: blur(40px) saturate(200%);
           
           box-shadow: 
-            0 6px 20px rgba(0, 0, 0, 0.15),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            0 12px 40px rgba(31, 38, 135, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
 
-        .true-glass-teal-button:hover::before {
-          background: linear-gradient(135deg, rgba(20, 184, 166, 0.08) 0%, rgba(14, 165, 233, 0.08) 100%);
+        .improved-glass-button:hover::before {
+          background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
         }
 
         .secondary-button {
@@ -202,6 +202,14 @@ const Hero = () => {
       `}</style>
 
       <section id="home" className="relative min-h-screen flex items-center justify-center px-4">
+        {/* Subtle background elements to showcase glassmorphism */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Gradient background shapes */}
+          <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-r from-teal-400/10 to-blue-400/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-32 right-20 w-80 h-80 bg-gradient-to-l from-purple-400/10 to-pink-400/10 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-gradient-to-br from-cyan-300/10 to-indigo-400/10 rounded-full blur-2xl"></div>
+        </div>
+
         <motion.div
           style={{ y, opacity }}
           variants={containerVariants}
@@ -255,7 +263,7 @@ const Hero = () => {
               variants={primaryButtonVariants}
               whileHover="hover"
               whileTap="tap"
-              className="true-glass-teal-button px-8 py-4 rounded-full text-lg font-medium transition-all duration-300"
+              className="improved-glass-button px-8 py-4 rounded-full text-lg font-medium transition-all duration-300"
               onClick={() => document.getElementById('contact').scrollIntoView({ behavior: 'smooth' })}
             >
               Get In Touch
