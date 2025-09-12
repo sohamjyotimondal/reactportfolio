@@ -8,7 +8,7 @@ const SkillScatter = () => {
 
   // Load CSV on mount
   useEffect(() => {
-    Papa.parse('/assets/tsne_embeddings.csv', {
+    Papa.parse('/assets/tsne_embeddings1.csv', {
       download: true,
       header: true,
       complete: (result) => {
@@ -35,8 +35,8 @@ const SkillScatter = () => {
         const plotHeight = 550; // increased from 500
         
         // Expansion factors to stretch the axes
-        const xExpansionFactor = 1.2;  // expand x-axis by 40%
-        const yExpansionFactor = 1.0;  // increase y-axis by 20%
+        const xExpansionFactor = 1.2;  // expand x-axis by 20%
+        const yExpansionFactor = 1.0;  // keep y-axis as is
 
         const normalizedSkills = parsedSkills.map(({ sentence, x, y }) => ({
           sentence,
@@ -54,12 +54,12 @@ const SkillScatter = () => {
     });
   }, []);
 
-  const containerWidth = 1100;  // increased to accommodate larger plot
-  const containerHeight = 700;  // reduced since no axes needed
+  const containerWidth = 1100;
+  const containerHeight = 700;
   const plotWidth = 800;
   const plotHeight = 550;
-  const marginLeft = 150;  // increased margins for better spacing
-  const marginTop = 75;    // reduced since no axis labels needed
+  const marginLeft = 50;   // reduced since we have side panel
+  const marginTop = 75;
 
   const pointVariants = {
     hidden: { opacity: 0, scale: 0 },
@@ -120,99 +120,148 @@ const SkillScatter = () => {
         </p>
       </motion.div>
 
-      {/* Main visualization */}
-      <div className="relative">
-        <svg
-          width={containerWidth}
-          height={containerHeight}
-          viewBox={`0 0 ${containerWidth} ${containerHeight}`}
-          className="overflow-visible"
+      {/* Main container with side panel and visualization */}
+      <div className="flex items-center gap-8 max-w-7xl">
+        {/* Left explanation panel */}
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1, delay: 0.8 }}
+          className="w-80 backdrop-blur-sm bg-white/5 rounded-2xl p-6 border border-white/10"
+          style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+            boxShadow: '0 20px 40px -12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+          }}
         >
-          <defs>
-            <linearGradient id="pointGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#60a5fa" />
-              <stop offset="50%" stopColor="#a855f7" />
-              <stop offset="100%" stopColor="#06b6d4" />
-            </linearGradient>
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">
+              How It's Made
+            </h3>
             
-            <filter id="softGlow">
-              <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-              <feMerge> 
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
-          
-          {/* Data points and labels */}
-          <motion.g
-            initial="hidden"
-            animate="visible"
-            transform={`translate(${marginLeft}, ${marginTop})`}
+            <div className="space-y-3 text-sm text-gray-300 leading-relaxed">
+              <p>
+                A <span className="text-blue-300 font-medium">t-SNE</span> (t-Distributed Stochastic Neighbor Embedding) visualisation of my skills .
+              </p>
+              
+              <p>
+                Skills are embedded using <span className="text-purple-300 font-medium">Qwen/Qwen3-Embedding-4B</span> sentence transformers, then dimensionally reduced to reveal semantic relationships.
+              </p>
+              
+              {/* <div className="border-l-2 border-cyan-400/30 pl-3 my-4">
+                <p className="text-cyan-300 text-xs font-medium mb-1">
+                  Key Parameters:
+                </p>
+                <ul className="text-xs text-gray-400 space-y-1">
+                  <li>• Perplexity: 5</li>
+                  <li>• Learning Rate: 200</li>
+                  <li>• Distance Metric: Cosine</li>
+                  <li>• Iterations: 1500</li>
+                </ul>
+              </div> */}
+{/*               
+              <p className="text-xs text-gray-400">
+                Related skills cluster together, revealing natural groupings 
+              </p> */}
+            </div>
+
+            
+          </div>
+        </motion.div>
+
+        {/* Main visualization */}
+        <div className="relative">
+          <svg
+            width={containerWidth}
+            height={containerHeight}
+            viewBox={`0 0 ${containerWidth} ${containerHeight}`}
+            className="overflow-visible"
           >
-            {skills.map((skill, i) => (
-              <motion.g 
-                key={skill.sentence}
-                style={{ transformOrigin: `${skill.x}px ${skill.y}px` }}
-              >
-                {/* Glow effect for hovered point */}
-                {hovered === i && (
+            <defs>
+              <linearGradient id="pointGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#60a5fa" />
+                <stop offset="50%" stopColor="#a855f7" />
+                <stop offset="100%" stopColor="#06b6d4" />
+              </linearGradient>
+              
+              <filter id="softGlow">
+                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                <feMerge> 
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            
+            {/* Data points and labels */}
+            <motion.g
+              initial="hidden"
+              animate="visible"
+              transform={`translate(${marginLeft}, ${marginTop})`}
+            >
+              {skills.map((skill, i) => (
+                <motion.g 
+                  key={skill.sentence}
+                  style={{ transformOrigin: `${skill.x}px ${skill.y}px` }}
+                >
+                  {/* Glow effect for hovered point */}
+                  {hovered === i && (
+                    <motion.circle
+                      cx={skill.x}
+                      cy={skill.y}
+                      r="15"
+                      fill="url(#pointGradient)"
+                      opacity="0.2"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      transition={{ duration: 0.3 }}
+                      style={{ transformOrigin: `${skill.x}px ${skill.y}px` }}
+                    />
+                  )}
+                  
+                  {/* Main data point */}
                   <motion.circle
                     cx={skill.x}
                     cy={skill.y}
-                    r="15"
+                    r="6"
                     fill="url(#pointGradient)"
-                    opacity="0.2"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    transition={{ duration: 0.3 }}
-                    style={{ transformOrigin: `${skill.x}px ${skill.y}px` }}
+                    stroke="rgba(255, 255, 255, 0.3)"
+                    strokeWidth="1"
+                    className="cursor-pointer"
+                    custom={i}
+                    variants={pointVariants}
+                    whileHover="hover"
+                    onHoverStart={() => setHovered(i)}
+                    onHoverEnd={() => setHovered(null)}
+                    filter={hovered === i ? "url(#softGlow)" : "none"}
+                    style={{
+                      filter: 'drop-shadow(0 2px 8px rgba(96, 165, 250, 0.3))',
+                      transformOrigin: `${skill.x}px ${skill.y}px`
+                    }}
                   />
-                )}
-                
-                {/* Main data point */}
-                <motion.circle
-                  cx={skill.x}
-                  cy={skill.y}
-                  r="6"
-                  fill="url(#pointGradient)"
-                  stroke="rgba(255, 255, 255, 0.3)"
-                  strokeWidth="1"
-                  className="cursor-pointer"
-                  custom={i}
-                  variants={pointVariants}
-                  whileHover="hover"
-                  onHoverStart={() => setHovered(i)}
-                  onHoverEnd={() => setHovered(null)}
-                  filter={hovered === i ? "url(#softGlow)" : "none"}
-                  style={{
-                    filter: 'drop-shadow(0 2px 8px rgba(96, 165, 250, 0.3))',
-                    transformOrigin: `${skill.x}px ${skill.y}px`
-                  }}
-                />
-                
-                {/* Text label */}
-                <motion.text
-                  x={skill.x + 12}
-                  y={skill.y + 5}
-                  className="text-sm font-medium select-none pointer-events-none"
-                  custom={i}
-                  variants={textVariants}
-                  whileHover="hover"
-                  style={{
-                    fill: hovered === i ? '#e2e8f0' : '#94a3b8',
-                    fontWeight: hovered === i ? '600' : '500',
-                    filter: hovered === i ? 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5))' : 'none',
-                    transformOrigin: `${skill.x + 12}px ${skill.y + 5}px`
-                  }}
-                >
-                  {skill.sentence}
-                </motion.text>
-              </motion.g>
-            ))}
-          </motion.g>
-        </svg>
+                  
+                  {/* Text label */}
+                  <motion.text
+                    x={skill.x + 12}
+                    y={skill.y + 5}
+                    className="text-sm font-medium select-none pointer-events-none"
+                    custom={i}
+                    variants={textVariants}
+                    whileHover="hover"
+                    style={{
+                      fill: hovered === i ? '#e2e8f0' : '#94a3b8',
+                      fontWeight: hovered === i ? '600' : '500',
+                      filter: hovered === i ? 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5))' : 'none',
+                      transformOrigin: `${skill.x + 12}px ${skill.y + 5}px`
+                    }}
+                  >
+                    {skill.sentence}
+                  </motion.text>
+                </motion.g>
+              ))}
+            </motion.g>
+          </svg>
+        </div>
       </div>
 
       {/* Subtle footer */}
@@ -223,7 +272,7 @@ const SkillScatter = () => {
         className="text-center mt-12"
       >
         <p className="text-xs text-gray-600 font-medium">
-          Hover over points to explore • Skills clustered by semantic similarity using Qwen/Qwen3-Embedding-4B
+          Hover over points to explore • Skills clustered by semantic similarity using DistilBERT embeddings
         </p>
       </motion.div>
     </div>
