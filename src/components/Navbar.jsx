@@ -65,16 +65,16 @@ const Navbar = ({ currentSection }) => {
                   onClick={() => scrollToSection(item.href)}
                   className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 z-10 ${
                     currentSection === item.href.slice(1)
-                      ? 'text-white font-semibold'
+                      ? 'text-white font-medium'
                       : 'text-gray-300 hover:text-teal-400'
                   }`}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {/* Glassmorphism Bubble Background */}
+                  {/* Minimalist Glass Bubble */}
                   {currentSection === item.href.slice(1) && (
                     <motion.div
-                      layoutId="glassyBubble"
+                      layoutId="minimalistBubble"
                       className="absolute inset-0 rounded-full"
                       transition={{
                         type: "spring",
@@ -88,23 +88,19 @@ const Navbar = ({ currentSection }) => {
                         scaleY: [1.2, 0.8, 1],
                       }}
                       style={{
-                        background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%)',
-                        backdropFilter: 'blur(12px)',
-                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                        boxShadow: `
-                          0 8px 32px rgba(20, 184, 166, 0.15),
-                          inset 0 1px 0 rgba(255, 255, 255, 0.3),
-                          inset 0 -1px 0 rgba(255, 255, 255, 0.1)
-                        `
+                        background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.06) 0%, rgba(59, 130, 246, 0.06) 100%)',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        boxShadow: '0 4px 12px rgba(20, 184, 166, 0.08)'
                       }}
                     />
                   )}
 
-                  {/* Inner Glow Layer */}
+                  {/* Subtle Inner Highlight */}
                   {currentSection === item.href.slice(1) && (
                     <motion.div
-                      layoutId="innerGlow"
-                      className="absolute inset-0 rounded-full"
+                      layoutId="innerHighlight"
+                      className="absolute inset-x-0 top-0 h-px rounded-full"
                       transition={{
                         type: "spring",
                         stiffness: 180,
@@ -112,61 +108,9 @@ const Navbar = ({ currentSection }) => {
                         mass: 1
                       }}
                       style={{
-                        background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)',
-                        filter: 'blur(1px)',
+                        background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)',
                       }}
                     />
-                  )}
-
-                  {/* Outer Glow/Shadow */}
-                  {currentSection === item.href.slice(1) && (
-                    <motion.div
-                      layoutId="outerGlow"
-                      className="absolute inset-0 rounded-full"
-                      transition={{
-                        type: "spring",
-                        stiffness: 150,
-                        damping: 30,
-                        mass: 1.2
-                      }}
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.3) 0%, rgba(59, 130, 246, 0.3) 100%)',
-                        filter: 'blur(8px)',
-                        transform: 'scale(1.1)',
-                        zIndex: -1
-                      }}
-                    />
-                  )}
-
-                  {/* Shimmer Effect */}
-                  {currentSection === item.href.slice(1) && (
-                    <motion.div
-                      className="absolute inset-0 rounded-full overflow-hidden"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: [0, 0.5, 0] }}
-                      transition={{ 
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                    >
-                      <motion.div
-                        className="absolute top-0 -left-full h-full w-1/2"
-                        animate={{ 
-                          x: ["0%", "400%"] 
-                        }}
-                        transition={{ 
-                          duration: 2,
-                          repeat: Infinity,
-                          ease: "easeInOut",
-                          delay: 1
-                        }}
-                        style={{
-                          background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent)',
-                          transform: 'skewX(-20deg)'
-                        }}
-                      />
-                    </motion.div>
                   )}
                   
                   <span className="relative z-10">{item.name}</span>
@@ -235,7 +179,7 @@ const Navbar = ({ currentSection }) => {
                   onClick={() => scrollToSection(item.href)}
                   className={`relative block px-4 py-3 rounded-full text-base font-medium w-full text-left transition-all duration-300 z-10 ${
                     currentSection === item.href.slice(1)
-                      ? 'text-white font-semibold'
+                      ? 'text-white font-medium'
                       : 'text-gray-300 hover:text-teal-400'
                   }`}
                   initial={{ opacity: 0, x: -50 }}
@@ -243,10 +187,10 @@ const Navbar = ({ currentSection }) => {
                   transition={{ delay: index * 0.1 }}
                   whileHover={{ x: 10 }}
                 >
-                  {/* Mobile Glassmorphism Bubble */}
+                  {/* Mobile Minimalist Bubble */}
                   {currentSection === item.href.slice(1) && (
                     <motion.div
-                      layoutId="glassyBubbleMobile"
+                      layoutId="minimalistBubbleMobile"
                       className="absolute inset-0 rounded-full"
                       transition={{
                         type: "spring",
@@ -259,14 +203,10 @@ const Navbar = ({ currentSection }) => {
                         scaleY: [1.15, 0.85, 1],
                       }}
                       style={{
-                        background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%)',
-                        backdropFilter: 'blur(12px)',
-                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                        boxShadow: `
-                          0 8px 32px rgba(20, 184, 166, 0.15),
-                          inset 0 1px 0 rgba(255, 255, 255, 0.3),
-                          inset 0 -1px 0 rgba(255, 255, 255, 0.1)
-                        `
+                        background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.06) 0%, rgba(59, 130, 246, 0.06) 100%)',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        boxShadow: '0 4px 12px rgba(20, 184, 166, 0.08)'
                       }}
                     />
                   )}
