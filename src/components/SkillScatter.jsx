@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
+import { useRef } from 'react';
 import Papa from 'papaparse';
 
 const SkillScatter = () => {
   const [skills, setSkills] = useState([]);
   const [hovered, setHovered] = useState(null);
+  
+  // Create ref for intersection observer
+  const ref = useRef(null);
+  const isInView = useInView(ref, { 
+    once: true,        // Animation triggers only once
+    threshold: 0.3     // Trigger when 30% of element is visible
+  });
 
   // Load CSV on mount
   useEffect(() => {
@@ -43,7 +51,10 @@ const SkillScatter = () => {
           x: normalize(x, xMin, xMax) * plotWidth * xExpansionFactor,
           y: (1 - normalize(y, yMin, yMax)) * plotHeight * yExpansionFactor,
           originalX: x,
-          originalY: y
+          originalY: y,
+          // Starting position for scatter animation (top-right corner)
+          initialX: plotWidth + 100,
+          initialY: -50
         }));
 
         setSkills(normalizedSkills);
@@ -61,16 +72,27 @@ const SkillScatter = () => {
   const marginLeft = 50;   // reduced since we have side panel
   const marginTop = 75;
 
+  // Animation duration for points (in seconds)
+  const pointsAnimationDuration = 1.5;
+
   const pointVariants = {
-    hidden: { opacity: 0, scale: 0 },
-    visible: i => ({
+    hidden: (skill) => ({ 
+      opacity: 0,
+      scale: 0,
+      x: skill.initialX, // Start from top-right corner
+      y: skill.initialY
+    }),
+    visible: (skill) => (i) => ({
       opacity: 1,
       scale: 1,
+      x: skill.x,  // Animate to final position
+      y: skill.y,
       transition: {
         type: 'spring',
-        stiffness: 120,
+        stiffness: 80,
         damping: 20,
-        delay: i * 0.02
+        delay: i * 0.08,  // Staggered delay for scatter effect
+        duration: 1.2
       }
     }),
     hover: {
@@ -84,12 +106,15 @@ const SkillScatter = () => {
   };
 
   const textVariants = {
-    hidden: { opacity: 0 },
+    hidden: { opacity: 0, scale: 0.8 },
     visible: i => ({
       opacity: 0.9,
+      scale: 1,
       transition: {
-        delay: i * 0.02 + 0.1,
-        duration: 0.5
+        // Text appears after points have settled (duration + max delay + buffer)
+        delay: pointsAnimationDuration + (skills.length * 0.08) + 0.2 + (i * 0.03),
+        duration: 0.4,
+        ease: "easeOut"
       }
     }),
     hover: {
@@ -104,28 +129,28 @@ const SkillScatter = () => {
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col items-center justify-center py-20">
+    <div className="w-full min-h-screen flex flex-col items-center justify-center py-20" ref={ref}>
       {/* Title */}
-      <motion.div 
+      {/* <motion.div 
         initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
+        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -30 }}
         transition={{ duration: 0.8, delay: 0.2 }}
         className="text-center mb-12"
-      >
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-cyan-400 bg-clip-text text-transparent mb-3">
+      > */}
+        {/* <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-cyan-400 bg-clip-text text-transparent mb-3">
           My Technical Skills
         </h2>
         <p className="text-gray-400 font-medium">
           t-SNE visualization of skill relationships
-        </p>
-      </motion.div>
+        </p> */}
+      {/* </motion.div> */}
 
       {/* Main container with side panel and visualization */}
       <div className="flex items-center gap-8 max-w-7xl">
         {/* Left explanation panel */}
         <motion.div
           initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
+          animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
           transition={{ duration: 1, delay: 0.8 }}
           className="w-80 backdrop-blur-sm bg-white/5 rounded-2xl p-6 border border-white/10"
           style={{
@@ -140,31 +165,13 @@ const SkillScatter = () => {
             
             <div className="space-y-3 text-sm text-gray-300 leading-relaxed">
               <p>
-                A <span className="text-blue-300 font-medium">t-SNE</span> (t-Distributed Stochastic Neighbor Embedding) visualisation of my skills .
+                A <span className="text-blue-300 font-medium">t-SNE</span> (t-Distributed Stochastic Neighbor Embedding) visualisation of my skills.
               </p>
               
               <p>
                 Skills are embedded using <span className="text-purple-300 font-medium">Qwen/Qwen3-Embedding-4B</span> sentence transformers, then dimensionally reduced to reveal semantic relationships.
               </p>
-              
-              {/* <div className="border-l-2 border-cyan-400/30 pl-3 my-4">
-                <p className="text-cyan-300 text-xs font-medium mb-1">
-                  Key Parameters:
-                </p>
-                <ul className="text-xs text-gray-400 space-y-1">
-                  <li>• Perplexity: 5</li>
-                  <li>• Learning Rate: 200</li>
-                  <li>• Distance Metric: Cosine</li>
-                  <li>• Iterations: 1500</li>
-                </ul>
-              </div> */}
-{/*               
-              <p className="text-xs text-gray-400">
-                Related skills cluster together, revealing natural groupings 
-              </p> */}
             </div>
-
-            
           </div>
         </motion.div>
 
@@ -194,8 +201,6 @@ const SkillScatter = () => {
             
             {/* Data points and labels */}
             <motion.g
-              initial="hidden"
-              animate="visible"
               transform={`translate(${marginLeft}, ${marginTop})`}
             >
               {skills.map((skill, i) => (
@@ -221,15 +226,15 @@ const SkillScatter = () => {
                   
                   {/* Main data point */}
                   <motion.circle
-                    cx={skill.x}
-                    cy={skill.y}
                     r="6"
                     fill="url(#pointGradient)"
                     stroke="rgba(255, 255, 255, 0.3)"
                     strokeWidth="1"
                     className="cursor-pointer"
-                    custom={i}
+                    custom={skill}
                     variants={pointVariants}
+                    initial="hidden"
+                    animate={isInView ? pointVariants.visible(skill)(i) : "hidden"}
                     whileHover="hover"
                     onHoverStart={() => setHovered(i)}
                     onHoverEnd={() => setHovered(null)}
@@ -247,6 +252,8 @@ const SkillScatter = () => {
                     className="text-sm font-medium select-none pointer-events-none"
                     custom={i}
                     variants={textVariants}
+                    initial="hidden"
+                    animate={isInView ? "visible" : "hidden"}
                     whileHover="hover"
                     style={{
                       fill: hovered === i ? '#e2e8f0' : '#94a3b8',
@@ -267,12 +274,15 @@ const SkillScatter = () => {
       {/* Subtle footer */}
       <motion.div 
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, delay: 1.2 }}
+        animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ 
+          duration: 0.8, 
+          delay: pointsAnimationDuration + (skills.length * 0.08) + 1 // Appears after all animations
+        }}
         className="text-center mt-12"
       >
         <p className="text-xs text-gray-600 font-medium">
-          Hover over points to explore • Skills clustered by semantic similarity using DistilBERT embeddings
+          Hover over points to explore • Skills clustered by semantic similarity using Qwen3-Embedding-4B
         </p>
       </motion.div>
     </div>
