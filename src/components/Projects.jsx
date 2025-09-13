@@ -1,12 +1,47 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { useRef } from 'react';
+
+// Custom hook for mouse follow effect
+const useMouseFollow = () => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const ref = useRef(null);
+
+  const handleMouseMove = (e) => {
+    if (!ref.current) return;
+    
+    const rect = ref.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    const mouseX = e.clientX - centerX;
+    const mouseY = e.clientY - centerY;
+    
+    // Scale the movement (reduce intensity)
+    const moveX = mouseX * 0.1; // 10% of mouse offset
+    const moveY = mouseY * 0.1; // 10% of mouse offset
+    
+    setMousePosition({ x: moveX, y: moveY });
+  };
+
+  const handleMouseLeave = () => {
+    setMousePosition({ x: 0, y: 0 });
+  };
+
+  return {
+    ref,
+    mousePosition,
+    handleMouseMove,
+    handleMouseLeave
+  };
+};
 
 const Projects = () => {
   const [selectedProject, setSelectedProject] = useState(null);
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
+  const sectionRef = useRef(null);
+  const isInView = useInView(sectionRef, { once: true });
+  
+  // Track if shimmer animation has been shown
+  const [shimmerComplete, setShimmerComplete] = useState(false);
 
   const projects = [
     {
@@ -63,7 +98,7 @@ const Projects = () => {
     hidden: {},
     visible: {
       transition: {
-        staggerChildren: 0.1
+        staggerChildren: 0.15
       }
     }
   };
@@ -90,7 +125,6 @@ const Projects = () => {
     hover: {
       y: -10,
       scale: 1.02,
-      rotateY: 5,
       boxShadow: "0 25px 50px rgba(0, 0, 0, 0.5)",
       transition: {
         type: "spring",
@@ -123,8 +157,131 @@ const Projects = () => {
     }
   };
 
+  // Project Card Component with Mouse Follow Effect and One-time Shimmer
+  const ProjectCard = ({ project, index }) => {
+    const { ref, mousePosition, handleMouseMove, handleMouseLeave } = useMouseFollow();
+
+    return (
+      <motion.div
+        variants={projectVariants}
+        whileHover="hover"
+        className="relative group cursor-pointer"
+        onClick={() => setSelectedProject(project)}
+        ref={ref}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
+        <motion.div
+          variants={cardHoverVariants}
+          className="relative bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 h-full hover:border-teal-500/30 transition-colors duration-300 overflow-hidden"
+          animate={{
+            x: mousePosition.x,
+            y: mousePosition.y,
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 150,
+            damping: 15,
+            mass: 0.1
+          }}
+        >
+          {/* Shimmer Effect - Only runs once on first load */}
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 rounded-xl"
+            initial={{ x: "-100%" }}
+            animate={isInView && !shimmerComplete ? { x: "200%" } : { x: "-100%" }}
+            transition={{
+              duration: 1.2,
+              delay: index * 0.15 + 0.5,
+              ease: "easeInOut"
+            }}
+            onAnimationComplete={() => {
+              if (isInView && !shimmerComplete) {
+                // Mark shimmer as complete after the last card finishes
+                if (index === projects.length - 1) {
+                  setShimmerComplete(true);
+                }
+              }
+            }}
+            style={{ zIndex: 1 }}
+          />
+
+          {/* Category Badge */}
+          <motion.div
+            className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-4 bg-gradient-to-r ${project.gradient} text-white relative z-10`}
+            whileHover={{ scale: 1.05 }}
+          >
+            {project.category}
+          </motion.div>
+
+          {/* Project Title */}
+          <motion.h3 
+            className="text-xl font-bold mb-3 text-white group-hover:text-teal-400 transition-colors duration-300 relative z-10"
+          >
+            {project.title}
+          </motion.h3>
+
+          {/* Description */}
+          <p className="text-gray-400 text-sm mb-4 line-clamp-3 relative z-10">
+            {project.description}
+          </p>
+
+          {/* Technologies */}
+          <div className="flex flex-wrap gap-2 mb-4 relative z-10">
+            {project.technologies.slice(0, 3).map((tech, techIndex) => (
+              <motion.span
+                key={techIndex}
+                className="text-xs bg-gray-700/50 text-gray-300 px-2 py-1 rounded"
+                whileHover={{ scale: 1.1, backgroundColor: "rgba(20, 184, 166, 0.2)" }}
+              >
+                {tech}
+              </motion.span>
+            ))}
+            {project.technologies.length > 3 && (
+              <span className="text-xs text-gray-500">
+                +{project.technologies.length - 3} more
+              </span>
+            )}
+          </div>
+
+          {/* Metrics Preview */}
+          {project.metrics && (
+            <div className="mt-4 pt-4 border-t border-gray-700/50 relative z-10">
+              <div className="text-xs text-gray-500 mb-2">Key Achievements</div>
+              <div className="space-y-1">
+                {Object.entries(project.metrics).slice(0, 2).map(([key, value]) => (
+                  <div key={key} className="flex justify-between text-sm">
+                    <span className="text-gray-400">{key}:</span>
+                    <span className="text-teal-400 font-medium">{value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Hover Overlay */}
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-blue-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            whileHover={{ opacity: 1 }}
+          />
+
+          {/* View Details Button */}
+          <motion.div
+            className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <div className="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center text-white text-sm">
+              →
+            </div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    );
+  };
+
   return (
-    <section id="projects" className="py-20 px-4 relative" ref={ref}>
+    <section id="projects" className="py-20 px-4 relative" ref={sectionRef}>
       {/* Background with animated blobs */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
@@ -169,8 +326,8 @@ const Projects = () => {
             animate={isInView ? { opacity: 1 } : {}}
             transition={{ delay: 0.2, duration: 0.8 }}
           >
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500">
-              Featured Projects
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#CF835D] to-[#691734]">
+              Projects which stand out
             </span>
           </motion.h2>
           
@@ -191,93 +348,8 @@ const Projects = () => {
           animate={isInView ? "visible" : "hidden"}
           className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
-          {projects.map((project) => (
-            <motion.div
-              key={project.id}
-              variants={projectVariants}
-              whileHover="hover"
-              className="relative group cursor-pointer"
-              onClick={() => setSelectedProject(project)}
-            >
-              <motion.div
-                variants={cardHoverVariants}
-                className="relative bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 h-full hover:border-teal-500/30 transition-colors duration-300"
-                style={{
-                  background: `linear-gradient(135deg, rgba(17, 24, 39, 0.8), rgba(31, 41, 55, 0.9))`,
-                }}
-              >
-                {/* Category Badge */}
-                <motion.div
-                  className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-4 bg-gradient-to-r ${project.gradient} text-white`}
-                  whileHover={{ scale: 1.05 }}
-                >
-                  {project.category}
-                </motion.div>
-
-                {/* Project Title */}
-                <motion.h3 
-                  className="text-xl font-bold mb-3 text-white group-hover:text-teal-400 transition-colors duration-300"
-                  layoutId={`title-${project.id}`}
-                >
-                  {project.title}
-                </motion.h3>
-
-                {/* Description */}
-                <p className="text-gray-400 text-sm mb-4 line-clamp-3">
-                  {project.description}
-                </p>
-
-                {/* Technologies */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {project.technologies.slice(0, 3).map((tech, index) => (
-                    <motion.span
-                      key={index}
-                      className="text-xs bg-gray-700/50 text-gray-300 px-2 py-1 rounded"
-                      whileHover={{ scale: 1.1, backgroundColor: "rgba(20, 184, 166, 0.2)" }}
-                    >
-                      {tech}
-                    </motion.span>
-                  ))}
-                  {project.technologies.length > 3 && (
-                    <span className="text-xs text-gray-500">
-                      +{project.technologies.length - 3} more
-                    </span>
-                  )}
-                </div>
-
-                {/* Metrics Preview */}
-                {project.metrics && (
-                  <div className="mt-4 pt-4 border-t border-gray-700/50">
-                    <div className="text-xs text-gray-500 mb-2">Key Achievements</div>
-                    <div className="space-y-1">
-                      {Object.entries(project.metrics).slice(0, 2).map(([key, value]) => (
-                        <div key={key} className="flex justify-between text-sm">
-                          <span className="text-gray-400">{key}:</span>
-                          <span className="text-teal-400 font-medium">{value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Hover Overlay */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-blue-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  whileHover={{ opacity: 1 }}
-                />
-
-                {/* View Details Button */}
-                <motion.div
-                  className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <div className="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center text-white text-sm">
-                    →
-                  </div>
-                </motion.div>
-              </motion.div>
-            </motion.div>
+          {projects.map((project, index) => (
+            <ProjectCard key={project.id} project={project} index={index} />
           ))}
         </motion.div>
       </div>
@@ -325,7 +397,6 @@ const Projects = () => {
 
               {/* Title */}
               <motion.h3
-                layoutId={`title-${selectedProject.id}`}
                 className="text-3xl font-bold mb-4 text-white"
               >
                 {selectedProject.title}

@@ -11,96 +11,59 @@ import Publications from './components/Publications';
 import Contact from './components/Contact';
 import ScrollProgress from './components/ScrollProgress';
 import ParticleBackground from './components/ParticleBackground';
+import LoadingScreen from './components/LoadingScreen';
 import './App.css';
 
 const App = () => {
   const [loading, setLoading] = useState(true);
   const [currentSection, setCurrentSection] = useState('home');
+  const [showAchievement, setShowAchievement] = useState(false);
 
   useEffect(() => {
-  // Simulate loading
-  const loadingTimeout = setTimeout(() => {
-    setLoading(false);
-    
-    // Set up observer after a brief delay to ensure DOM is ready
-    setTimeout(() => {
-      const sections = document.querySelectorAll('section[id]');
-      
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setCurrentSection(entry.target.id);
+    // Start achievement animation after a brief delay
+    const achievementTimeout = setTimeout(() => {
+      setShowAchievement(true);
+    }, 500);
+
+    // Hide achievement and finish loading
+    const loadingTimeout = setTimeout(() => {
+      setShowAchievement(false);
+      // Small delay before hiding loading screen
+      setTimeout(() => {
+        setLoading(false);
+        
+        // Set up intersection observer
+        setTimeout(() => {
+          const sections = document.querySelectorAll('section[id]');
+          
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  setCurrentSection(entry.target.id);
+                }
+              });
+            },
+            { 
+              threshold: 0.3,
+              rootMargin: '-50px 0px -50px 0px'
             }
-          });
-        },
-        { 
-          threshold: 0.3,
-          rootMargin: '-50px 0px -50px 0px'
-        }
-      );
+          );
 
-      sections.forEach((section) => observer.observe(section));
-    }, 100); // Small delay to ensure DOM is rendered
-  }, 2000);
+          sections.forEach((section) => observer.observe(section));
+        }, 100);
+      }, 800); // Delay to let slide-out complete
+    }, 3500);
 
-  return () => clearTimeout(loadingTimeout);
-}, []);
+    return () => {
+      clearTimeout(achievementTimeout);
+      clearTimeout(loadingTimeout);
+    };
+  }, []);
 
-  // Loading Animation
+  // Show loading screen
   if (loading) {
-    return (
-      <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900"
-        initial={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <motion.div className="text-center">
-          <motion.div
-            className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-600 mb-4"
-            animate={{ 
-              scale: [1, 1.2, 1],
-              rotate: [0, 5, -5, 0]
-            }}
-            transition={{ 
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
-            SJM
-          </motion.div>
-          
-          {/* Loading dots animation */}
-          <div className="flex justify-center space-x-2">
-            {[0, 1, 2].map((index) => (
-              <motion.div
-                key={index}
-                className="w-3 h-3 bg-teal-400 rounded-full"
-                animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [0.3, 1, 0.3]
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  delay: index * 0.2
-                }}
-              />
-            ))}
-          </div>
-          
-          <motion.p
-            className="text-gray-400 mt-4"
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            VibeCoding Portfolio
-          </motion.p>
-        </motion.div>
-      </motion.div>
-    );
+    return <LoadingScreen showAchievement={showAchievement} />;
   }
 
   return (
@@ -116,27 +79,27 @@ const App = () => {
           transition={{ duration: 1 }}
         >
           <section id="home">
-          <Hero />
-        </section>
-        <section id="about">
-          <About />
-        </section>
-        <section id="skills">
-          <Skills />
-          <SkillScatter />
-        </section>
-        <section id="experience">
-          <Experience />
-        </section>
-        <section id="projects">
-          <Projects />
-        </section>
-        <section id="publications">
-          <Publications />
-        </section>
-        <section id="contact">
-          <Contact />
-        </section>
+            <Hero />
+          </section>
+          <section id="about">
+            <About />
+          </section>
+          <section id="skills">
+            <Skills />
+            <SkillScatter />
+          </section>
+          <section id="experience">
+            <Experience />
+          </section>
+          <section id="projects">
+            <Projects />
+          </section>
+          <section id="publications">
+            <Publications />
+          </section>
+          <section id="contact">
+            <Contact />
+          </section>
         </motion.main>
       </AnimatePresence>
       

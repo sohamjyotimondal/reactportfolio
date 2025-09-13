@@ -61,6 +61,9 @@ section {
   position: relative;
   overflow: hidden;
 }
+.timeline-center {
+  transform: translateX(-50%) !important;
+}
 
 .progress-bar::after {
   content: '';
@@ -73,6 +76,8 @@ section {
   transform: translateX(-100%);
   animation: shimmer 2s infinite;
 }
+
+
 
 @keyframes shimmer {
   100% {

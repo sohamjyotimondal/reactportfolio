@@ -11,7 +11,7 @@ const SkillScatter = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { 
     once: true,        // Animation triggers only once
-    threshold: 0.3     // Trigger when 30% of element is visible
+    amount: 0.4    // Trigger when 30% of element is visible
   });
 
   // Load CSV on mount
@@ -38,9 +38,9 @@ const SkillScatter = () => {
 
         const normalize = (value, min, max) => (value - min) / (max - min);
 
-        // Increased plot dimensions and expansion factors
-        const plotWidth = 800;  // increased from 700
-        const plotHeight = 550; // increased from 500
+        // // Increased plot dimensions and expansion factors
+        // const plotWidth = 800;  // increased from 700
+        // const plotHeight = 550; // increased from 500
         
         // Expansion factors to stretch the axes
         const xExpansionFactor = 1.2;  // expand x-axis by 20%
