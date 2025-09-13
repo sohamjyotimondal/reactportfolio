@@ -11,7 +11,7 @@ const Experience = () => {
       company: "Samsung R&D Institute Bangalore",
       position: "Advanced Research Intern",
       duration: "July 2024 – Feb 2025",
-      type: "current",
+      type: "completed",
       logo: "🏢",
       responsibilities: [
         "Explored and implemented various audio preprocessing techniques for body sound analysis, including audio-specific data augmentation and advanced filtering methods to improve the quality and accuracy of sound interpretation.",
@@ -105,7 +105,7 @@ const Experience = () => {
           className="relative"
         >
           {/* Timeline Line */}
-          <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-teal-400 via-blue-500 to-purple-600 transform -translate-x-1/2"></div>
+<div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-teal-400 via-blue-500 to-purple-600 timeline-center"></div>
 
           {experiences.map((exp, index) => (
             <motion.div
@@ -115,23 +115,24 @@ const Experience = () => {
                 index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
               }`}
             >
-              {/* Timeline Node */}
-              <motion.div
-                className={`absolute left-8 md:left-1/2 w-4 h-4 rounded-full bg-gradient-to-r ${exp.color} transform -translate-x-1/2 z-10`}
-                animate={{
-                  scale: [1, 1.2, 1],
-                  boxShadow: [
-                    "0 0 0 0 rgba(20, 184, 166, 0.4)",
-                    "0 0 0 10px rgba(20, 184, 166, 0)",
-                    "0 0 0 0 rgba(20, 184, 166, 0)"
-                  ]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  delay: index * 0.5
-                }}
-              />
+              
+{/* Timeline Node */}
+<motion.div
+  className={`absolute left-8 md:left-1/2 w-4 h-4 rounded-full bg-gradient-to-r ${exp.color} timeline-center z-10`}
+  animate={{
+    scale: [1, 1.2, 1],
+    boxShadow: [
+      "0 0 0 0 rgba(20, 184, 166, 0.4)",
+      "0 0 0 10px rgba(20, 184, 166, 0)",
+      "0 0 0 0 rgba(20, 184, 166, 0)"
+    ]
+  }}
+  transition={{
+    duration: 2,
+    repeat: Infinity,
+    delay: index * 0.5
+  }}
+/>
 
               {/* Content Card */}
               <motion.div
@@ -215,45 +216,7 @@ const Experience = () => {
           ))}
         </motion.div>
 
-        {/* Summary Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 1.2, duration: 0.6 }}
-          className="mt-16 grid grid-cols-2 md:grid-cols-3 gap-8"
-        >
-          {[
-            { label: "Total Experience", value: "1+ Year", icon: "⏰" },
-            { label: "Companies", value: "2", icon: "🏢" },
-            { label: "Projects Delivered", value: "4+", icon: "🚀" }
-          ].map((stat, index) => (
-            <motion.div
-              key={index}
-              className="text-center p-6 bg-gray-800/30 backdrop-blur-sm rounded-xl border border-gray-700/30"
-              whileHover={{
-                scale: 1.05,
-                backgroundColor: "rgba(31, 41, 55, 0.6)"
-              }}
-              animate={{
-                y: [0, -5, 0],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                delay: index * 0.7,
-                ease: "easeInOut"
-              }}
-            >
-              <div className="text-3xl mb-2">{stat.icon}</div>
-              <div className="text-2xl font-bold text-teal-400 mb-1">
-                {stat.value}
-              </div>
-              <div className="text-gray-400 text-sm">
-                {stat.label}
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
+       
       </div>
     </section>
   );
