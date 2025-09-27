@@ -1,56 +1,91 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import MyCustomImage from '../assets/profileimage.jpg'; // adjust path as needed
+import MyCustomImage from '../assets/profileimage.jpg';
 
 const About = () => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-
-  // Terminal animation state
-  const bashLines = [
+ const ref = useRef(null);
+  const isInView = useInView(ref, { 
+    once: true,
+    amount: 0.4  // Animation starts when 40% of the component is visible
+  });
+  // Static lines (already visible) and animated lines
+  const staticLines = [
     'soham@root:~$ whoami',
     'Soham Jyoti Mondal, Final year VIT Chennai',
+    'soham@root:~$ cat interests.txt',
+    'Machine Learning & AI Research',
+    'Webscraping and Automation',
+    'Cybersecurity',
     'soham@root:~$ pip install hobbies',
-    'Installing collected packages',
-    'Successfully installed 3 packages',
-    'Coding for the love of it',
-    'Reading books and poetry',
-    'Gambling (not really :)'
+    'Installing collected packages...',
+    'Successfully installed 3 packages:'
   ];
 
-  const [terminalText, setTerminalText] = useState([]);
-  const [currentLine, setCurrentLine] = useState(0);
+ 
+  const animatedLines = [
+    
+    'Reading books and poetry ✓',
+    'Coding and Finance',
+    'Playing games (the wolf logo is inspired from witcher 3) ;)'
+  ];
+
+  const [terminalText, setTerminalText] = useState(staticLines);
+  const [currentAnimatedLine, setCurrentAnimatedLine] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
+  const [animationStarted, setAnimationStarted] = useState(false);
+  const [animationComplete, setAnimationComplete] = useState(false);
 
   useEffect(() => {
-    if (!isInView) return;
-    if (currentLine < bashLines.length) {
-      if (charIndex <= bashLines[currentLine].length) {
-        // Type out the next character after a delay
+    if (!isInView || animationStarted) return;
+    
+    // Start animation when section comes into view
+    setAnimationStarted(true);
+    
+    // Add a delay before starting the typing animation
+    const startDelay = setTimeout(() => {
+      setTerminalText(prev => [...prev, '']);
+    }, 500);
+
+    return () => clearTimeout(startDelay);
+  }, [isInView]);
+
+  useEffect(() => {
+    if (!animationStarted) return;
+    
+    if (currentAnimatedLine < animatedLines.length) {
+      if (charIndex <= animatedLines[currentAnimatedLine].length) {
         const timer = setTimeout(() => {
-          setTerminalText((prev) => {
+          setTerminalText(prev => {
             let newLines = [...prev];
-            newLines[currentLine] = bashLines[currentLine].slice(0, charIndex);
+            const lineIndex = staticLines.length + currentAnimatedLine;
+            newLines[lineIndex] = animatedLines[currentAnimatedLine].slice(0, charIndex);
             return newLines;
           });
-          setCharIndex((c) => c + 1);
-        }, currentLine === 0 ? 40 : 23); // longer bash line, then normal typing
+          setCharIndex(c => c + 1);
+        }, 60); // Typing speed
+        
         return () => clearTimeout(timer);
       } else {
-        // Line complete, wait then move to next line
+        // Line complete, move to next line
         setTimeout(() => {
-          setTerminalText((prev) => [...prev, ""]);
-          setCurrentLine((l) => l + 1);
-          setCharIndex(0);
-        }, 380);
+          if (currentAnimatedLine < animatedLines.length - 1) {
+            setTerminalText(prev => [...prev, '']);
+            setCurrentAnimatedLine(l => l + 1);
+            setCharIndex(0);
+          } else {
+            // All animations complete, add empty line for cursor
+            setTerminalText(prev => [...prev, '']);
+            setAnimationComplete(true);
+          }
+        }, 800); // Pause between lines
       }
     }
-  }, [currentLine, charIndex, isInView]);
+  }, [currentAnimatedLine, charIndex, animationStarted]);
 
   // Cursor animation
   const [blink, setBlink] = useState(true);
   useEffect(() => {
-    const cursorTimer = setInterval(() => setBlink((b) => !b), 540);
+    const cursorTimer = setInterval(() => setBlink(b => !b), 540);
     return () => clearInterval(cursorTimer);
   }, []);
 
@@ -66,7 +101,7 @@ const About = () => {
 
   return (
     <section id="about" className="py-20 px-4 relative" ref={ref}>
-      {/* Floating background elements with reduced opacity */}
+      {/* Floating background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute top-1/4 left-1/1 w-80 h-80 bg-gradient-to-br from-teal-500/10 to-blue-500/10 rounded-full blur-2xl"
@@ -114,19 +149,37 @@ const About = () => {
                 <span className="w-3 h-3 rounded-full bg-green-400"></span>
                 <span className="ml-4 text-xs text-teal-400 font-mono">soham's@terminal</span>
               </div>
-              {/* Animated terminal content */}
-              <div className="px-6 py-7 font-mono text-lg text-teal-300 min-h-[350px]">
+
+              {/* Terminal content */}
+              <div className="px-6 py-7 font-mono text-sm text-teal-300 min-h-[400px] leading-relaxed">
                 {terminalText.map((line, i) => (
-                  <div key={i} className="whitespace-pre">
-                    {line}
-                    {i === currentLine && blink && <span className="inline-block w-2 h-6 bg-teal-400 animate-blink ml-1 rounded-sm" />}
+                  <div key={i} className="mb-1">
+                    <span className="whitespace-pre">{line}</span>
+                    {/* Show cursor during typing */}
+                    {i === staticLines.length + currentAnimatedLine && 
+                     currentAnimatedLine < animatedLines.length && 
+                     !animationComplete &&
+                     blink && (
+                      <span className="inline-block w-[2px] h-[1em] bg-teal-400 ml-1 translate-y-[2px] animate-blink" />
+                    )}
                   </div>
                 ))}
+                
+                {/* Show cursor on new line after animation is complete */}
+                {animationComplete && (
+                  <div className="mb-1">
+                    <span className="whitespace-pre">soham@root:~$</span>
+                    {blink && (
+                      <span className="inline-block w-[2px] h-[1em] bg-teal-400 ml-1 translate-y-[2px] animate-blink" />
+                    )}
+                  </div>
+                )}
               </div>
             </motion.div>
           </motion.div>
         </motion.div>
       </div>
+
       {/* Custom cursor blink animation */}
       <style>{`
         .animate-blink {

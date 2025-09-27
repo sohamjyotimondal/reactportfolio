@@ -91,7 +91,21 @@ const Projects = () => {
       technologies: ["Graph Neural Networks", "Python", "Recommendation Systems"],
       category: "Recommendation Systems",
       gradient: "from-orange-500 to-red-500"
-    }
+    },
+    {
+  id: 6,
+  title: "Game of Thrones Chatbot",
+  description: "Built a Game of Thrones-themed chatbot that delivers witty, in-character quotes using Groq's fast LLM inference and LlamaIndex for data orchestration, wrapped in a stylish 'Game of Quotes' interface.",
+  technologies: ["Groq LLM", "LlamaIndex", "Python", "Gradio"],
+  metrics: {
+    "Response Speed": "Ultra-fast with Groq LPU",
+    "Character Accuracy": "In-character quotes",
+    "Interface": "Game of Quotes themed"
+  },
+  category: "AI Chatbot",
+  gradient: "from-amber-500 to-orange-500"
+}
+
   ];
 
   const containerVariants = {
