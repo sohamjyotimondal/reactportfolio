@@ -75,10 +75,33 @@ const Hero = () => {
     }
   };
 
-  const primaryButtonVariants = {
+  const shinyButtonVariants = {
+    initial: { 
+      "--x": "100%", 
+      scale: 0.95 
+    },
+    animate: { 
+      "--x": "-100%", 
+      scale: 1,
+      transition: {
+        "--x": {
+          repeat: Infinity,
+          repeatType: "loop",
+          repeatDelay: 2,
+          duration: 3,
+          ease: "linear"
+        },
+        scale: {
+          type: "spring",
+          stiffness: 200,
+          damping: 8
+        }
+      }
+    },
     hover: {
       scale: 1.05,
       y: -2,
+      boxShadow: "0 15px 40px rgba(31, 38, 135, 0.4)",
       transition: {
         type: "spring",
         stiffness: 400,
@@ -107,7 +130,7 @@ const Hero = () => {
 
   return (
     <>
-      {/* CSS for animated gradient and improved glassmorphism */}
+      {/* CSS for animated gradient, glassmorphism and shiny effect */}
       <style jsx>{`
         @keyframes gradientMove {
           0% { background-position: 0% 50%; }
@@ -132,54 +155,64 @@ const Hero = () => {
           animation: gradientMove 8s ease-in-out infinite;
         }
 
-        .improved-glass-button {
-          /* Ultra transparent - true glassmorphism */
-          background: rgba(255, 255, 255, 0.05);
+        .shiny-glass-button {
+          /* Enhanced glassmorphism base */
+          background: rgba(255, 255, 255, 0.08);
           backdrop-filter: blur(40px) saturate(180%);
           -webkit-backdrop-filter: blur(40px) saturate(180%);
+          border: 1px solid rgba(255, 255, 255, 0.15);
           
-          /* Subtle border for glass edge */
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          
-          /* White text with subtle shadow */
-          color: rgba(255, 255, 255, 0.9);
-          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          /* Professional glass shadow with more depth */
+          box-shadow: 
+            0 12px 32px rgba(31, 38, 135, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.25),
+            0 0 20px rgba(20, 184, 166, 0.1);
           
           position: relative;
           overflow: hidden;
-          
-          /* Professional glass shadow */
-          box-shadow: 
-            0 8px 32px rgba(31, 38, 135, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
-        .improved-glass-button::before {
-          content: '';
+        .shiny-text {
+          position: relative;
+          color: rgba(255, 255, 255, 0.95);
+          font-weight: 600;
+          text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+          
+          /* Shiny mask effect */
+          background: linear-gradient(
+            -75deg,
+            rgba(255, 255, 255, 0.1) calc(var(--x) + 0%),
+            rgba(255, 255, 255, 0.9) calc(var(--x) + 20%),
+            rgba(20, 184, 166, 0.8) calc(var(--x) + 25%),
+            rgba(255, 255, 255, 0.9) calc(var(--x) + 30%),
+            rgba(255, 255, 255, 0.1) calc(var(--x) + 50%)
+          );
+          background-clip: text;
+          -webkit-background-clip: text;
+          background-size: 200% 100%;
+        }
+
+        .shine-overlay {
           position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          /* Minimal tint overlay */
-          background: linear-gradient(135deg, rgba(20, 184, 166, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
-          z-index: -1;
-        }
-
-        .improved-glass-button:hover {
-          /* Slightly more visible on hover */
-          background: rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.18);
-          backdrop-filter: blur(40px) saturate(200%);
-          -webkit-backdrop-filter: blur(40px) saturate(200%);
+          inset: 0;
+          border-radius: inherit;
           
-          box-shadow: 
-            0 12px 40px rgba(31, 38, 135, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3);
-        }
-
-        .improved-glass-button:hover::before {
-          background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+          /* Moving shine overlay */
+          background: linear-gradient(
+            -75deg,
+            transparent calc(var(--x) + 0%),
+            rgba(20, 184, 166, 0.15) calc(var(--x) + 20%),
+            rgba(255, 255, 255, 0.2) calc(var(--x) + 25%),
+            rgba(20, 184, 166, 0.15) calc(var(--x) + 30%),
+            transparent calc(var(--x) + 50%)
+          );
+          
+          /* Mask to create border effect */
+          mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+          mask-composite: exclude;
+          -webkit-mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+          -webkit-mask-composite: xor;
+          padding: 1px;
         }
 
         .secondary-button {
@@ -207,7 +240,6 @@ const Hero = () => {
           {/* Gradient background shapes */}
           <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-r from-teal-400/10 to-blue-400/10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-32 right-20 w-80 h-80 bg-gradient-to-l from-purple-400/10 to-pink-400/10 rounded-full blur-3xl"></div>
-          {/* <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-gradient-to-br from-cyan-300/10 to-indigo-400/10 rounded-full blur-2xl"></div> */}
         </div>
 
         <motion.div
@@ -259,14 +291,20 @@ const Hero = () => {
             className="flex flex-col sm:flex-row gap-4 justify-center"
             variants={itemVariants}
           >
+            {/* Shiny Glass Button */}
             <motion.button
-              variants={primaryButtonVariants}
+              variants={shinyButtonVariants}
+              initial="initial"
+              animate="animate"
               whileHover="hover"
               whileTap="tap"
-              className="improved-glass-button px-8 py-4 rounded-full text-lg font-medium transition-all duration-300"
+              className="shiny-glass-button px-8 py-4 rounded-full text-lg transition-all duration-300"
               onClick={() => document.getElementById('contact').scrollIntoView({ behavior: 'smooth' })}
             >
-              Get In Touch
+              <span className="shiny-text">
+                Get In Touch
+              </span>
+              <div className="shine-overlay"></div>
             </motion.button>
             
             <motion.button

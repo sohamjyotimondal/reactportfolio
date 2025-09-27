@@ -5,6 +5,8 @@
   "dependencies": {
     "autoprefixer": "^10.4.16",
     "framer-motion": "^10.16.4",
+    "gsap": "^3.13.0",
+    "ogl": "^1.0.11",
     "papaparse": "^5.5.3",
     "postcss": "^8.4.31",
     "react": "^18.2.0",

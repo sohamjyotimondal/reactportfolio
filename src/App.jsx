@@ -10,8 +10,8 @@ import Projects from './components/Projects';
 import Publications from './components/Publications';
 import Contact from './components/Contact';
 import ScrollProgress from './components/ScrollProgress';
-// Remove this import: import ParticleBackground from './components/ParticleBackground';
-import Particles from './components/Particles'; // Keep only this one
+import ParticleBackground from './components/ParticleBackground';
+import Particles from './components/Particles';
 import LoadingScreen from './components/LoadingScreen';
 import './App.css';
 
@@ -29,7 +29,6 @@ const App = () => {
     // Hide achievement and finish loading
     const loadingTimeout = setTimeout(() => {
       setShowAchievement(false);
-      
       // Small delay before hiding loading screen
       setTimeout(() => {
         setLoading(false);
@@ -37,6 +36,7 @@ const App = () => {
         // Set up intersection observer
         setTimeout(() => {
           const sections = document.querySelectorAll('section[id]');
+          
           const observer = new IntersectionObserver(
             (entries) => {
               entries.forEach((entry) => {
@@ -45,11 +45,12 @@ const App = () => {
                 }
               });
             },
-            {
+            { 
               threshold: 0.3,
               rootMargin: '-50px 0px -50px 0px'
             }
           );
+
           sections.forEach((section) => observer.observe(section));
         }, 100);
       }, 800); // Delay to let slide-out complete
@@ -67,38 +68,44 @@ const App = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      {/* React Bits Particles Background - Fixed behind everything */}
-      <Particles
-        particleCount={1000}
-        particleSpread={12}
-        speed={0.08}
-        particleColors={['#14b8a6', '#d73bf6ff', '#06b6d4', '#8b5cf6']}
-        moveParticlesOnHover={true}
-        particleHoverFactor={0.4}
-        alphaParticles={true}
-        particleBaseSize={100}
-        sizeRandomness={0.8}
-        cameraDistance={25}
-        disableRotation={false}
-      />
-
-      {/* Content layer with proper z-index */}
-      <div className="relative z-10">
-        <ScrollProgress />
-        <Navbar currentSection={currentSection} />
-        
-        <main>
-          <Hero />
-          <About />
-          <Skills />
-          <SkillScatter />
-          <Experience />
-          <Projects />
-          <Publications />
-          <Contact />
-        </main>
-      </div>
+    <div className="relative min-h-screen bg-gray-900 text-white overflow-x-hidden">
+      <ParticleBackground/>
+      <ScrollProgress />
+      <Navbar currentSection={currentSection} />
+      
+      <AnimatePresence mode="wait">
+        <motion.main
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+        >
+          <section id="home">
+            <Hero />
+          </section>
+          <section id="about">
+            <About />
+          </section>
+          <section id="skills">
+            <Skills />
+            <SkillScatter />
+          </section>
+          <section id="experience">
+            <Experience />
+          </section>
+          <section id="projects">
+            <Projects />
+          </section>
+          {/* <section id="publications">
+            <Publications />
+          </section> */}
+          <section id="contact">
+            <Contact />
+          </section>
+        </motion.main>
+      </AnimatePresence>
+      
+      {/* Background gradient overlay */}
+      <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 pointer-events-none z-[-1]" />
     </div>
   );
 };

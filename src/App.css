@@ -77,7 +77,21 @@ section {
   animation: shimmer 2s infinite;
 }
 
+.particles-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
 
+/* Ensure content stays on top */
+.content-layer {
+  position: relative;
+  z-index: 10;
+}
 
 @keyframes shimmer {
   100% {
