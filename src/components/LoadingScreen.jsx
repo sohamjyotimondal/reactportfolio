@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import trophyIcon from '../assets/award.png';
 
 const LoadingScreen = ({ showAchievement }) => {
   return (
@@ -53,20 +54,20 @@ const LoadingScreen = ({ showAchievement }) => {
                 }}
               >
                 {/* Your SM Logo - Replace this with your actual logo */}
-                <motion.div
-                  className="text-white font-bold text-lg"
-                  animate={{ 
-                    rotate: [0, 10, -10, 0],
-                    scale: [1, 1.1, 1]
-                  }}
-                  transition={{ 
-                    duration: 0.6,
-                    repeat: Infinity,
-                    repeatDelay: 1.5
-                  }}
-                >
-                  SM
-                </motion.div>
+                <motion.img
+  src={trophyIcon}
+  alt="Trophy Logo"
+  className="w-8 h-8 filter brightness-0 invert" // Makes it white like the text was
+  animate={{ 
+    rotate: [0, 10, -10, 0],
+    scale: [1, 1.1, 1]
+  }}
+  transition={{ 
+    duration: 0.6,
+    repeat: Infinity,
+    repeatDelay: 1.5
+  }}
+/>
                 
                 {/* Glowing pulse effect */}
                 <motion.div
