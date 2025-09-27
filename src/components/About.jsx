@@ -6,9 +6,9 @@ const About = () => {
  const ref = useRef(null);
   const isInView = useInView(ref, { 
     once: true,
-    amount: 0.4  // Animation starts when 40% of the component is visible
+    amount: 0.4  
   });
-  // Static lines (already visible) and animated lines
+ 
   const staticLines = [
     'soham@root:~$ whoami',
     'Soham Jyoti Mondal, Final year VIT Chennai',
