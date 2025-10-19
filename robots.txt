@@ -5,6 +5,3 @@ Disallow: /static/
 
 # Sitemap location
 Sitemap: https://sohamjyotimondal.me/sitemap.xml
-
-# Crawl-delay for better server performance
-Crawl-delay: 1
