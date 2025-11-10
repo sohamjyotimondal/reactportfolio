@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Lenis from '@studio-freight/lenis';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -19,6 +20,42 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [currentSection, setCurrentSection] = useState('home');
   const [showAchievement, setShowAchievement] = useState(false);
+  const lenisRef = useRef(null);
+
+  useEffect(() => {
+    // Initialize Lenis smooth scroll with optimized settings
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // easeOutExpo
+      direction: 'vertical',
+      gestureDirection: 'vertical',
+      smooth: true,
+       lerp: 0.07,   
+      mouseMultiplier: 1,
+      smoothWheel: true,
+      smoothTouch: false,
+      touchMultiplier: 2,
+      infinite: false,
+    });
+
+    lenisRef.current = lenis;
+
+    // Add lenis class to html for CSS optimizations
+    document.documentElement.classList.add('lenis');
+
+    // Animation frame loop for smooth scrolling
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+      document.documentElement.classList.remove('lenis');
+    };
+  }, []);
 
   useEffect(() => {
     // Start achievement animation after a brief delay

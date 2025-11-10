@@ -1,233 +1,180 @@
-import React, { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import React, { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+const cards = [
+  {
+    title: 'Generative AI & LLM Systems',
+    category: 'AI & ML',
+    image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1200&q=80',
+    summary: 'Building production-grade agentic AI systems with advanced RAG pipelines and prompt engineering.',
+    highlights: ['LangChain / LlamaIndex', 'CrewAI framework', 'Azure AI / AWS', 'Model fine-tuning'],
+    shadowColor: 'rgba(139, 92, 246, 0.5)',
+  },
+  {
+    title: 'Backend Engineering & API Development',
+    category: 'Web Engineering',
+    image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80',
+    summary: 'Architecting scalable REST APIs and data pipelines with automated SQL generation and GraphQL integration.',
+    highlights: ['FastAPI / Flask', 'GraphQL integration', 'REST API design', 'Dynamic query generation'],
+    shadowColor: 'rgba(34, 211, 238, 0.5)',
+  },
+  {
+    title: 'Web Scraping & Data Collection',
+    category: 'Data Engineering',
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80',
+    summary: 'Building automated scraping pipelines for multi-platform data aggregation with anti-detection strategies.',
+    highlights: ['Custom scrapers (Twitter, Reddit)', 'Devfolio / Devpost automation', 'Data pipeline orchestration', 'Beautiful Soup / Scrapy'],
+    shadowColor: 'rgba(236, 72, 153, 0.5)',
+  },
+  {
+    title: 'Network Analysis & Security',
+    category: 'Cybersecurity',
+    image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=1200&q=80',
+    summary: 'Protocol analysis and traffic inspection using industry-standard tools for security auditing and debugging.',
+    highlights: ['Wireshark packet analysis', 'mitmproxy / Burp Suite', 'API reverse engineering', 'Network debugging'],
+    shadowColor: 'rgba(251, 146, 60, 0.5)',
+  },
+  {
+    title: 'Computer Vision & Medical Imaging',
+    category: 'Deep Learning',
+    image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80',
+    summary: 'Specialized in medical image segmentation, model distillation, and efficient deployment strategies.',
+    highlights: ['UNETR / MoE architectures', 'Knowledge distillation', '75% size reduction', 'Tumor segmentation'],
+    shadowColor: 'rgba(59, 130, 246, 0.5)',
+  },
+  {
+    title: 'Audio Processing & Reinforcement Learning',
+    category: 'AI Systems',
+    image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1200&q=80',
+    summary: 'Advanced signal processing for medical diagnostics and adaptive game AI with custom reward functions.',
+    highlights: ['CED model benchmarking', 'Unity ML integration', 'Graph neural networks', 'Body sound classification'],
+    shadowColor: 'rgba(16, 185, 129, 0.5)',
+  },
+];
+
+
+
 
 const Skills = () => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
+  const sectionRef = useRef(null);
 
-  const skillCategories = [
-    {
-      title: "Languages",
-      skills: [
-        "Python (Advanced)", "Java", "C++", "SQL", "JavaScript", "Dart", "C"
-      ]
-    },
-    {
-      title: "Frameworks & Libraries", 
-      skills: [
-        "TensorFlow", "PyTorch", "LangChain", "FastAPI", "Flask", "Hugging Face", "GraphQL"
-      ]
-    },
-    {
-      title: "Specializations",
-      skills: [
-        "Machine Learning", "Computer Vision", "NLP", "Deep Learning", 
-        "Data Analysis", "Model Optimization"
-      ]
-    }
-  ];
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
 
-  const containerVariants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.15
-      }
-    }
-  };
+    const ctx = gsap.context(() => {
+      gsap.utils.toArray('.skill-card').forEach((card, index) => {
+        const cover = card.querySelector('.skill-card__cover');
+        if (!cover) return;
 
-  const cardVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: 60,
-      scale: 0.95
-    },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 80,
-        damping: 20,
-        duration: 0.8
-      }
-    }
-  };
+        gsap.fromTo(
+          cover,
+          { yPercent: -18 },
+          {
+            yPercent: 18,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top bottom',
+              end: 'bottom top',
+              scrub: true,
+            },
+          }
+        );
 
-  const skillBadgeVariants = {
-    hidden: { 
-      opacity: 0, 
-      scale: 0.8 
-    },
-    visible: { 
-      opacity: 1, 
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 120,
-        damping: 12
-      }
-    }
-  };
+        gsap.fromTo(
+          card,
+          { y: index % 2 === 0 ? 90 : 30, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1.1,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 85%',
+              toggleActions: 'play none none reverse',
+            },
+          }
+        );
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <>
-      {/* CSS for animated gradient text - unique to Skills section */}
-      <style jsx>{`
-        @keyframes gradientMoveSkills {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        
-        .animated-gradient-text-skills {
-          background: linear-gradient(
-            90deg,
-            #3c53aeff,
-            #26797fff,
-            #8ec3dcff,
-            #986c92ff,
-            #26797fff,
-            #3d6ac9ff
-          );
-          background-size: 300% 300%;
-          background-clip: text;
-          -webkit-background-clip: text;
-          color: transparent;
-          animation: gradientMoveSkills 8s ease-in-out infinite;
-        }
-      `}</style>
+    <section
+      id="skills"
+      ref={sectionRef}
+      className="relative py-28 px-6 overflow-hidden"
+    >
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-slate-950/70 via-slate-900/60 to-black/70 backdrop-blur-[2px]" aria-hidden="true" />
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div className="absolute top-12 right-16 h-56 w-56 rounded-full bg-purple-500/12 blur-3xl" />
+        <div className="absolute bottom-0 left-6 h-72 w-72 rounded-full bg-cyan-500/8 blur-3xl" />
+      </div>
 
-      <section id="skills" className="py-24 px-4 relative overflow-hidden" ref={ref}>
-        {/* Floating background elements */}
-        <div className="absolute inset-0">
-          <motion.div
-            className="absolute top-1/4 left-1/6 w-96 h-96 rounded-full blur-3xl opacity-10"
-            style={{
-              background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.4), rgba(59, 130, 246, 0.3))'
-            }}
-            animate={{
-              x: [0, 50, -30, 0],
-              y: [0, -30, 20, 0],
-              scale: [1, 1.1, 0.95, 1],
-            }}
-            transition={{
-              duration: 25,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
+      <div className="relative z-10 mx-auto max-w-6xl">
+        <div className="mb-24 text-center">
+          <p className="text-sm uppercase tracking-[0.8em] text-purple-400/80 mb-6">Skillset</p>
+          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
+              Don't be a noun be a{' '}
+            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              VERB
+            </span>
+          </h2>
+          <p className="mx-auto max-w-3xl text-lg text-gray-400">
+           The joy of computer science comes from the ability to create impactful solutions across diverse domains.
+          </p>
         </div>
 
-        <div className="max-w-7xl mx-auto relative">
-          {/* Header with Unique Animated Gradient Text */}
-          <motion.div
-            initial={{ opacity: 0, y: -30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-center mb-20"
-          >
-            <motion.h2 
-              className="text-6xl md:text-7xl font-bold mb-6 animated-gradient-text-skills"
+        <div className="grid gap-10 md:grid-cols-2">
+          {cards.map((card, index) => (
+            <div
+              key={card.title}
+              className="skill-card relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.04] shadow-[0_40px_80px_-40px_rgba(15,118,110,0.45)] backdrop-blur-xl transition-transform duration-700 hover:-translate-y-3"
+              style={{ transformStyle: 'preserve-3d' }}
             >
-              Technical Skills
-            </motion.h2>
-            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-              Expertise spanning AI/ML, software development, and cutting-edge technologies
-            </p>
-          </motion.div>
-
-          {/* Skills Cards with Subtle Green Glowing Border */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate={isInView ? "visible" : "hidden"}
-            className="grid grid-cols-1 lg:grid-cols-3 gap-8"
-          >
-            {skillCategories.map((category, index) => (
-              <motion.div
-                key={category.title}
-                variants={cardVariants}
-                whileHover={{
-                  y: -8,
-                  scale: 1.02,
-                  boxShadow: "0 0 25px rgba(6, 182, 212, 0.4), 0 24px 48px -12px rgba(6, 182, 212, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15)",
-                  borderColor: "rgba(6, 182, 212, 0.5)",
-                  transition: { type: "spring", stiffness: 300, damping: 20 }
-                }}
-                className="relative group backdrop-blur-sm bg-white/5 rounded-2xl p-8"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
-                  boxShadow: '0 0 10px rgba(6, 182, 212, 0.25), 0 20px 40px -12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(14, 123, 143, 0.3)',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                {/* Category Title */}
-                <motion.h3 
-                  className="text-2xl font-semibold bg-gradient-to-r from-[#1D9172] to-[#346A8C] bg-clip-text text-transparent mb-8 text-center"
-                  whileHover={{ 
-                    scale: 1.05
-                  }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  {category.title}
-                </motion.h3>
-
-                {/* Skills Pills - Smaller Size with Secondary Button Styling */}
-                <div className="flex flex-wrap gap-3 justify-center">
-                  {category.skills.map((skill, skillIndex) => (
-                    <motion.div
-                      key={skill}
-                      variants={skillBadgeVariants}
-                      whileHover={{
-                        scale: 1.05,
-                        y: -2,
-                        boxShadow: "0 0 20px rgba(6, 182, 212, 0.4), 0 0 40px rgba(6, 182, 212, 0.1)"
-                      }}
-                      whileTap={{ scale: 0.98 }}
-                      className="secondary-button px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 cursor-pointer backdrop-blur-sm bg-white/10 border border-white/20 text-gray-300 hover:text-white hover:bg-white/15"
-                      style={{
-                        boxShadow: "0 0 8px rgba(6, 182, 212, 0.15), 0 0 16px rgba(6, 182, 212, 0.05)",
-                        borderColor: "rgba(6, 182, 212, 0.2)"
-                      }}
-                      initial="hidden"
-                      animate={isInView ? "visible" : "hidden"}
-                      transition={{
-                        delay: index * 0.1 + skillIndex * 0.05,
-                        duration: 0.3
-                      }}
-                    >
-                      {skill}
-                    </motion.div>
-                  ))}
-                </div>
-
-                {/* Subtle corner decoration - more transparent */}
-                <motion.div
-                  className="absolute -bottom-4 -right-4 w-16 h-16 rounded-full opacity-10"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(59, 130, 246, 0.1))'
-                  }}
-                  animate={{
-                    rotate: [0, 360],
-                    scale: [1, 1.05, 1]
-                  }}
-                  transition={{
-                    duration: 15,
-                    repeat: Infinity,
-                    ease: "linear"
-                  }}
+              <figure className="relative h-64 overflow-hidden">
+                <img
+                  src={card.image}
+                  alt={card.title}
+                  className="skill-card__cover absolute inset-0 h-full w-full object-cover"
                 />
-              </motion.div>
-            ))}
-          </motion.div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <span className="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white/80">
+                  {card.category}
+                  <span className="h-1.5 w-1.5 rounded-full bg-white/60" />
+                </span>
+              </figure>
+
+              <div className="relative space-y-5 p-8">
+                <h3 className="text-2xl font-semibold text-white">{card.title}</h3>
+                <p className="text-base leading-relaxed text-gray-400">{card.summary}</p>
+                <ul className="grid gap-3 text-sm text-gray-300 sm:grid-cols-2">
+                  {card.highlights.map((item) => (
+                    <li key={item} className="flex items-start gap-2">
+                      <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-400 to-purple-400" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="pt-6">
+                  {/* <div className="inline-flex items-center gap-3 text-xs uppercase tracking-[0.4em] text-white/50">
+                    <span>Scroll</span>
+                    <span className="h-px w-10 bg-white/40" />
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                  </div> */}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 };
-
 
 export default Skills;

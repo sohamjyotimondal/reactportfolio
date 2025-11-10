@@ -2,6 +2,31 @@
   text-align: center;
 }
 
+/* Optimize scrolling performance */
+html {
+  scroll-behavior: auto; /* Let Lenis handle smoothness */
+}
+
+html.lenis {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
 .particle {
   position: absolute;
   width: 4px;
@@ -10,6 +35,7 @@
   border-radius: 50%;
   opacity: 0.6;
   animation: float 6s ease-in-out infinite;
+  will-change: transform;
 }
 
 .particle:nth-child(odd) {
