@@ -283,7 +283,7 @@ const Hero = () => {
             className="text-lg md:text-xl text-gray-400 mb-8 max-w-3xl mx-auto leading-relaxed"
             variants={itemVariants}
           >
-            And Icarus laughed as he fell, for he knew to fall means to once have soared.
+            I have a UDP joke but you might not get it.
           </motion.p>
 
           {/* CTA Buttons */}
