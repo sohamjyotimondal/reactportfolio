@@ -283,7 +283,7 @@ const Hero = () => {
             className="text-lg md:text-xl text-gray-400 mb-8 max-w-3xl mx-auto leading-relaxed"
             variants={itemVariants}
           >
-            I have a UDP joke but you might not get it.
+            I have an UDP joke but you might not get it.
           </motion.p>
 
           {/* CTA Buttons */}

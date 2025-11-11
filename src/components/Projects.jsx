@@ -1,464 +1,324 @@
-import React, { useState, useRef } from 'react';
-import { motion, AnimatePresence, useInView } from 'framer-motion';
+import React, { useRef, useEffect } from 'react';
+import { motion, useMotionValue } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
+import { ArrowUpRight } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// Custom hook for mouse follow effect
-const useMouseFollow = () => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const ref = useRef(null);
+gsap.registerPlugin(ScrollTrigger);
 
-  const handleMouseMove = (e) => {
-    if (!ref.current) return;
-    
-    const rect = ref.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    
-    const mouseX = e.clientX - centerX;
-    const mouseY = e.clientY - centerY;
-    
-    // Scale the movement (reduce intensity)
-    const moveX = mouseX * 0.1; // 10% of mouse offset
-    const moveY = mouseY * 0.1; // 10% of mouse offset
-    
-    setMousePosition({ x: moveX, y: moveY });
-  };
+const projects = [
+  {
+    id: 1,
+    title: "Medical Image Segmentation with MoE",
+    description: "Developed a compact segmentation model using knowledge distillation from a modified UNETR model with mixture of experts. Achieved 46% reduction in inference time and 75% decrease in model size.",
+    technologies: ["PyTorch", "UNETR", "Medical Imaging", "Model Distillation"],
+    metrics: {
+      "Inference Time Reduction": "46%",
+      "Model Size Reduction": "75%",
+      "Dice Score Drop": "Only 2%"
+    },
+    category: "Medical AI",
+    accent: "from-pink-500/30 via-rose-500/20 to-fuchsia-400/30",
+    liveUrl: "https://github.com/sohamjyotimondal/HUMoR",
+    githubUrl: "https://github.com/sohamjyotimondal/HUMoR"
+  },
+  {
+    id: 2,
+    title: "NExUS - Neural Cryptographic Block Cipher",
+    description: "Novel 128-bit symmetric-key block cipher combining Invertible Neural Networks with traditional cryptography. Replaces static S-boxes with learnable bijective transformations using modular arithmetic, achieving near-ideal avalanche effect and resistance to differential/linear attacks.",
+    technologies: ["Python", "Invertible Neural Networks", "Cryptography", "SHA-512", "Modular Arithmetic"],
+    metrics: {
+      "Avalanche Effect": "63.92 bits (ideal: 64)",
+      "Key Avalanche": "64.01 bits",
+      "Ciphertext Uniformity": "p-value: 0.791",
+      "SAC Probability": "0.4997 (ideal: 0.5)"
+    },
+    category: "Cryptography & Security",
+    accent: "from-purple-500/30 via-indigo-500/20 to-blue-400/30",
+    liveUrl: "https://github.com/sohamjyotimondal",
+    githubUrl: "https://github.com/sohamjyotimondal"
+  },
+  {
+    id: 3,
+    title: "Revenant NeuroSpawn - RL Zombie Spawner",
+    description: "Deep RL-powered intelligent zombie spawner for Unity shooter game with strategic spawn decisions. Features running normalizer, custom state simulation, and policy gradient training with entropy regularization for dynamic, context-aware gameplay.",
+    technologies: ["Unity", "Deep Learning", "C#", "Reinforcement Learning", "Policy Gradients"],
+    metrics: {
+      "Neural Network": "11-input state, 5 spawn points",
+      "Architecture": "Shared layers + specialized heads",
+      "Training": "Policy gradients with LR scheduling"
+    },
+    category: "Game AI",
+    accent: "from-green-500/30 via-teal-500/20 to-emerald-400/30",
+    liveUrl: "https://github.com/sohamjyotimondal/Neurospawn",
+    githubUrl: "https://github.com/sohamjyotimondal/Neurospawn"
+  },
+  {
+    id: 4,
+    title: "NLP Customer Priority System",
+    description: "Developed NLP system for automatic customer complaint prioritization using BERT and RoBERTa with attention-based fine-tuning for enhanced after-sales service efficiency.",
+    technologies: ["BERT", "RoBERTa", "NLP", "Text Classification"],
+    category: "Natural Language Processing",
+    accent: "from-blue-500/30 via-cyan-500/20 to-sky-400/30",
+    liveUrl: "https://github.com/sohamjyotimondal"
+  },
+  {
+    id: 5,
+    title: "Game of Thrones Chatbot",
+    description: "Built a Game of Thrones-themed chatbot that delivers witty, in-character quotes using Groq's fast LLM inference and LlamaIndex for data orchestration, wrapped in a stylish 'Game of Quotes' interface.",
+    technologies: ["Groq LLM", "LlamaIndex", "Python", "Gradio"],
+    metrics: {
+      "Response Speed": "Ultra-fast with Groq LPU",
+      "Character Accuracy": "In-character quotes",
+      "Interface": "Game of Quotes themed"
+    },
+    category: "AI Chatbot",
+    accent: "from-amber-500/30 via-orange-500/20 to-yellow-400/30",
+    liveUrl: "https://github.com/sohamjyotimondal", // Update with actual repo
+    githubUrl: "https://github.com/sohamjyotimondal" // Update with actual repo
+  },
+  {
+    id: 6,
+    title: "CrewDoc-AI - Healthcare Risk Prediction Engine",
+    description: "AI-driven risk prediction engine forecasting 90-day deterioration probability for chronic care patients. Features synthetic longitudinal patient data generation, 197 engineered time-series features, calibrated XGBoost model with AUROC 0.909, SHAP explainability, and multi-agent CrewAI validation. Includes interactive Streamlit dashboards for cohort management, patient deep dives, and clinical decision support.",
+    technologies: ["XGBoost", "SHAP", "CrewAI", "Streamlit", "Python", "Scikit-learn", "Optuna", "Time-Series ML"],
+    metrics: {
+      "AUROC": "0.909",
+      "AUPRC": "0.684",
+      "Sensitivity/Specificity": "0.804 / 0.848",
+      "Calibration": "Brier Score 0.098",
+      "Feature Set": "197 engineered features",
+      "Dataset": "5,000 synthetic patients"
+    },
+    category: "Healthcare AI & MLOps",
+    accent: "from-amber-500/30 via-orange-500/20 to-yellow-400/30",
+    liveUrl: "https://github.com/sohamjyotimondal/crewdocscreening",
+    githubUrl: "https://github.com/sohamjyotimondal/crewdocscreening"
+  }
+];
 
-  const handleMouseLeave = () => {
-    setMousePosition({ x: 0, y: 0 });
-  };
 
-  return {
-    ref,
-    mousePosition,
-    handleMouseMove,
-    handleMouseLeave
-  };
+
+
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+const spring = {
+  type: "spring",
+  stiffness: 200,
+  damping: 30,
+  mass: 0.6,
 };
 
-const Projects = () => {
-  const [selectedProject, setSelectedProject] = useState(null);
-  const sectionRef = useRef(null);
-  const isInView = useInView(sectionRef, { once: true });
-  
-  // Track if shimmer animation has been shown
-  const [shimmerComplete, setShimmerComplete] = useState(false);
+const Card = ({ project, index }) => {
+  const cardRef = useRef(null);
+  const rotateX = useMotionValue(0);
+  const rotateY = useMotionValue(0);
+  const { ref: inViewRef, inView } = useInView({ triggerOnce: true, threshold: 0.2 });
 
-  const projects = [
-    {
-      id: 1,
-      title: "Medical Image Segmentation with MoE",
-      description: "Developed a compact segmentation model using knowledge distillation from a modified UNETR model with mixture of experts. Achieved 46% reduction in inference time and 75% decrease in model size.",
-      technologies: ["PyTorch", "UNETR", "Medical Imaging", "Model Distillation"],
-      metrics: {
-        "Inference Time Reduction": "46%",
-        "Model Size Reduction": "75%",
-        "Dice Score Drop": "Only 2%"
+  const setRefs = (node) => {
+    cardRef.current = node;
+    inViewRef(node);
+  };
+
+  // GSAP Parallax Effect - Different movement for each column in 3-col layout
+  useEffect(() => {
+    if (!cardRef.current) return;
+
+    const element = cardRef.current;
+    
+    // Calculate column position (0 = left, 1 = middle, 2 = right in 3-col layout)
+    const columnPosition = index % 3;
+    
+    // Side columns move down, middle column moves up
+    let direction;
+    if (columnPosition === 0) {
+      direction = 100; // Left - scroll down
+    } else if (columnPosition === 1) {
+      direction = -80; // Middle - scroll up
+    } else {
+      direction = 100; // Right - scroll down
+    }
+
+    gsap.to(element, {
+      scrollTrigger: {
+        trigger: element,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 1.5,
+        invalidateOnRefresh: true,
       },
-      category: "Medical AI",
-      gradient: "from-pink-500 to-rose-500"
-    },
-    {
-      id: 2,
-      title: "Reinforcement Learning Game AI",
-      description: "Implemented RL-based zombie spawner for Unity game that dynamically adjusts spawn patterns based on real-time player state using deep neural networks and custom reward functions.",
-      technologies: ["Unity", "Deep Learning", "C#", "Reinforcement Learning"],
-      category: "Game Development",
-      gradient: "from-purple-500 to-indigo-500"
-    },
-    {
-      id: 3,
-      title: "Cryptographic Neural Networks",
-      description: "Built cryptographic system using Invertible Neural Networks and normalizing flows with controlled randomness creating avalanche effect, reducing computational overhead by 30%.",
-      technologies: ["Python", "Cryptography", "Neural Networks", "Security"],
-      metrics: {
-        "Overhead Reduction": "30%"
-      },
-      category: "Security",
-      gradient: "from-green-500 to-teal-500"
-    },
-    {
-      id: 4,
-      title: "NLP Customer Priority System",
-      description: "Developed NLP system for automatic customer complaint prioritization using BERT and RoBERTa with attention-based fine-tuning for enhanced after-sales service efficiency.",
-      technologies: ["BERT", "RoBERTa", "NLP", "Text Classification"],
-      category: "Natural Language Processing",
-      gradient: "from-blue-500 to-cyan-500"
-    },
-    {
-      id: 5,
-      title: "Graph Neural Course Recommendations",
-      description: "Created GNN-based recommendation system for corporate environments, modeling complex relationships between employees, course history, and hierarchical management levels.",
-      technologies: ["Graph Neural Networks", "Python", "Recommendation Systems"],
-      category: "Recommendation Systems",
-      gradient: "from-orange-500 to-red-500"
-    },
-    {
-  id: 6,
-  title: "Game of Thrones Chatbot",
-  description: "Built a Game of Thrones-themed chatbot that delivers witty, in-character quotes using Groq's fast LLM inference and LlamaIndex for data orchestration, wrapped in a stylish 'Game of Quotes' interface.",
-  technologies: ["Groq LLM", "LlamaIndex", "Python", "Gradio"],
-  metrics: {
-    "Response Speed": "Ultra-fast with Groq LPU",
-    "Character Accuracy": "In-character quotes",
-    "Interface": "Game of Quotes themed"
-  },
-  category: "AI Chatbot",
-  gradient: "from-amber-500 to-orange-500"
-}
+      y: direction,
+      ease: "none",
+    });
 
-  ];
+    return () => {
+      ScrollTrigger.getAll().forEach((trigger) => {
+        if (trigger.vars.trigger === element) {
+          trigger.kill();
+        }
+      });
+    };
+  }, [index]);
 
-  const containerVariants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.15
-      }
-    }
+  const handleMove = (event) => {
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const percentX = clamp((x - centerX) / centerX, -1, 1);
+    const percentY = clamp((y - centerY) / centerY, -1, 1);
+
+    rotateY.set(percentX * 8);
+    rotateX.set(-percentY * 8);
   };
 
-  const projectVariants = {
-    hidden: {
-      opacity: 0,
-      y: 50,
-      scale: 0.9
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 15
-      }
-    }
-  };
-
-  const cardHoverVariants = {
-    hover: {
-      y: -10,
-      scale: 1.02,
-      boxShadow: "0 25px 50px rgba(0, 0, 0, 0.5)",
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 20
-      }
-    }
-  };
-
-  const overlayVariants = {
-    hidden: {
-      opacity: 0,
-      scale: 0.8,
-    },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 25
-      }
-    },
-    exit: {
-      opacity: 0,
-      scale: 0.8,
-      transition: {
-        duration: 0.2
-      }
-    }
-  };
-
-  // Project Card Component with Mouse Follow Effect and One-time Shimmer
-  const ProjectCard = ({ project, index }) => {
-    const { ref, mousePosition, handleMouseMove, handleMouseLeave } = useMouseFollow();
-
-    return (
-      <motion.div
-        variants={projectVariants}
-        whileHover="hover"
-        className="relative group cursor-pointer"
-        onClick={() => setSelectedProject(project)}
-        ref={ref}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-      >
-        <motion.div
-          variants={cardHoverVariants}
-          className="relative bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 h-full hover:border-teal-500/30 transition-colors duration-300 overflow-hidden"
-          animate={{
-            x: mousePosition.x,
-            y: mousePosition.y,
-          }}
-          transition={{
-            type: "spring",
-            stiffness: 150,
-            damping: 15,
-            mass: 0.1
-          }}
-        >
-          {/* Shimmer Effect - Only runs once on first load */}
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 rounded-xl"
-            initial={{ x: "-100%" }}
-            animate={isInView && !shimmerComplete ? { x: "200%" } : { x: "-100%" }}
-            transition={{
-              duration: 1.2,
-              delay: index * 0.15 + 0.5,
-              ease: "easeInOut"
-            }}
-            onAnimationComplete={() => {
-              if (isInView && !shimmerComplete) {
-                // Mark shimmer as complete after the last card finishes
-                if (index === projects.length - 1) {
-                  setShimmerComplete(true);
-                }
-              }
-            }}
-            style={{ zIndex: 1 }}
-          />
-
-          {/* Category Badge */}
-          <motion.div
-            className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-4 bg-gradient-to-r ${project.gradient} text-white relative z-10`}
-            whileHover={{ scale: 1.05 }}
-          >
-            {project.category}
-          </motion.div>
-
-          {/* Project Title */}
-          <motion.h3 
-            className="text-xl font-bold mb-3 text-white group-hover:text-teal-400 transition-colors duration-300 relative z-10"
-          >
-            {project.title}
-          </motion.h3>
-
-          {/* Description */}
-          <p className="text-gray-400 text-sm mb-4 line-clamp-3 relative z-10">
-            {project.description}
-          </p>
-
-          {/* Technologies */}
-          <div className="flex flex-wrap gap-2 mb-4 relative z-10">
-            {project.technologies.slice(0, 3).map((tech, techIndex) => (
-              <motion.span
-                key={techIndex}
-                className="text-xs bg-gray-700/50 text-gray-300 px-2 py-1 rounded"
-                whileHover={{ scale: 1.1, backgroundColor: "rgba(20, 184, 166, 0.2)" }}
-              >
-                {tech}
-              </motion.span>
-            ))}
-            {project.technologies.length > 3 && (
-              <span className="text-xs text-gray-500">
-                +{project.technologies.length - 3} more
-              </span>
-            )}
-          </div>
-
-          {/* Metrics Preview */}
-          {project.metrics && (
-            <div className="mt-4 pt-4 border-t border-gray-700/50 relative z-10">
-              <div className="text-xs text-gray-500 mb-2">Key Achievements</div>
-              <div className="space-y-1">
-                {Object.entries(project.metrics).slice(0, 2).map(([key, value]) => (
-                  <div key={key} className="flex justify-between text-sm">
-                    <span className="text-gray-400">{key}:</span>
-                    <span className="text-teal-400 font-medium">{value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Hover Overlay */}
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-blue-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            whileHover={{ opacity: 1 }}
-          />
-
-          {/* View Details Button */}
-          <motion.div
-            className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <div className="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center text-white text-sm">
-              →
-            </div>
-          </motion.div>
-        </motion.div>
-      </motion.div>
-    );
+  const handleLeave = () => {
+    rotateX.set(0);
+    rotateY.set(0);
   };
 
   return (
-    <section id="projects" className="py-20 px-4 relative" ref={sectionRef}>
-      {/* Background with animated blobs */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-br from-teal-500/10 to-blue-500/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            x: [0, 50, 0],
-            y: [0, -30, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.div
-          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1.2, 1, 1.2],
-            x: [0, -30, 0],
-            y: [0, 40, 0],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      </div>
+    <motion.article
+      ref={setRefs}
+      initial={{ opacity: 0, y: 60 }}
+      animate={{ opacity: inView ? 1 : 0, y: inView ? 0 : 60 }}
+      transition={{ delay: index * 0.12, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      className="relative flex h-full flex-col justify-between rounded-3xl border border-white/8 bg-white/[0.02] p-6 text-left backdrop-blur-xl will-change-transform"
+      style={{
+        transformStyle: "preserve-3d",
+        boxShadow: "0 40px 80px -40px rgba(15, 23, 42, 0.45), 0 20px 40px -30px rgba(99, 102, 241, 0.35), 0 0 0 1px rgba(255,255,255,0.05)",
+      }}
+    >
+      <motion.div
+        className={`pointer-events-none absolute -inset-px rounded-[26px] bg-gradient-to-br ${project.accent} opacity-40 blur-2xl`}
+        style={{ zIndex: 0 }}
+      />
 
-      <div className="max-w-7xl mx-auto">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -50 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <motion.h2 
-            className="text-5xl md:text-6xl font-bold mb-4"
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : {}}
-            transition={{ delay: 0.2, duration: 0.8 }}
+      <motion.div
+        className="pointer-events-none absolute inset-0 rounded-3xl border border-white/5"
+        style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.3)" }}
+      />
+
+      <div className="relative z-10 flex flex-1 flex-col gap-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <div className={`mb-3 inline-block rounded-full border border-white/10 bg-gradient-to-r ${project.accent.replace(/\/\d+/g, '')} px-3 py-1 text-xs font-medium uppercase tracking-wide text-white`}>
+              {project.category}
+            </div>
+            <h3 className="text-2xl font-semibold leading-tight text-white md:text-3xl">{project.title}</h3>
+            <p className="mt-3 text-sm leading-relaxed text-slate-300/80 md:text-base">
+              {project.description}
+            </p>
+          </div>
+          <motion.a
+            href={project.liveUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="group relative inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] text-white/80 backdrop-blur-sm"
+            whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.15)" }}
+            transition={spring}
           >
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#CF835D] to-[#691734]">
-              Projects which stand out
-            </span>
-          </motion.h2>
-          
-          <motion.p 
-            className="text-xl text-gray-400 max-w-2xl mx-auto"
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : {}}
-            transition={{ delay: 0.4, duration: 0.8 }}
-          >
-            Innovative solutions combining AI, machine learning, and cutting-edge technologies
-          </motion.p>
-        </motion.div>
+            <ArrowUpRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-[2px] group-hover:-translate-y-[2px]" />
+            <span className="sr-only">Open project</span>
+          </motion.a>
+        </div>
 
-        {/* Projects Grid */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          {projects.map((project, index) => (
-            <ProjectCard key={project.id} project={project} index={index} />
-          ))}
-        </motion.div>
-      </div>
-
-      {/* Project Detail Modal */}
-      <AnimatePresence>
-        {selectedProject && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            {/* Backdrop */}
-            <motion.div
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedProject(null)}
-            />
-
-            {/* Modal Content */}
-            <motion.div
-              variants={overlayVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="relative bg-gray-800/95 backdrop-blur-md border border-gray-700/50 rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        <div className="mt-auto flex flex-wrap gap-2">
+          {project.technologies.slice(0, 3).map((tech) => (
+            <span
+              key={tech}
+              className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium uppercase tracking-wide text-slate-200/70"
             >
-              {/* Close Button */}
-              <motion.button
-                className="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setSelectedProject(null)}
-              >
-                ×
-              </motion.button>
+              {tech}
+            </span>
+          ))}
+          {project.technologies.length > 3 && (
+            <span className="flex items-center rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-slate-400">
+              +{project.technologies.length - 3}
+            </span>
+          )}
+        </div>
+      </div>
+    </motion.article>
+  );
+};
 
-              {/* Category */}
-              <div className={`inline-block px-4 py-2 rounded-full text-sm font-medium mb-4 bg-gradient-to-r ${selectedProject.gradient} text-white`}>
-                {selectedProject.category}
-              </div>
+const Projects = () => {
+  const carouselRef = useRef(null);
+  const cursorOffset = useMotionValue(0);
+  const { ref: sectionRef, inView } = useInView({ threshold: 0.2, triggerOnce: true });
 
-              {/* Title */}
-              <motion.h3
-                className="text-3xl font-bold mb-4 text-white"
-              >
-                {selectedProject.title}
-              </motion.h3>
+  const handleMouseMove = (event) => {
+    const rect = carouselRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const offset = ((event.clientX - rect.left) / rect.width - 0.5) * 30;
+    cursorOffset.set(offset);
+  };
 
-              {/* Description */}
-              <p className="text-gray-300 text-lg mb-6 leading-relaxed">
-                {selectedProject.description}
-              </p>
+  return (
+    <section
+      id="projects"
+      ref={sectionRef}
+      className="relative z-10 mx-auto w-full max-w-7xl px-6 py-24 text-white sm:px-8 md:px-10"
+    >
+      {/* Parallax background gradient accent */}
+      <motion.div
+        className="pointer-events-none absolute left-1/4 top-1/3 h-96 w-96 rounded-full bg-gradient-to-br from-purple-500/10 to-pink-500/10 blur-3xl"
+        style={{
+          y: useMotionValue(0),
+        }}
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.3, 0.5, 0.3],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
 
-              {/* Technologies */}
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold text-white mb-3">Technologies Used</h4>
-                <div className="flex flex-wrap gap-2">
-                  {selectedProject.technologies.map((tech, index) => (
-                    <motion.span
-                      key={index}
-                      className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-lg text-sm"
-                      whileHover={{ scale: 1.05, backgroundColor: "rgba(20, 184, 166, 0.2)" }}
-                    >
-                      {tech}
-                    </motion.span>
-                  ))}
-                </div>
-              </div>
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: inView ? 1 : 0, y: inView ? 0 : 40 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="mx-auto max-w-3xl text-center"
+      >
+        <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1 text-xs font-medium uppercase tracking-[0.2em] text-white/70 backdrop-blur-sm">
+          Selected Work
+        </span>
+        <h2 className="mt-6 text-4xl font-semibold sm:text-5xl md:text-6xl">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#CF835D] to-[#691734]">
+            Projects in Focus
+          </span>
+        </h2>
+        <p className="mt-4 text-base leading-relaxed text-slate-300/80 md:text-lg">
+          Innovative solutions combining AI, machine learning, and cutting-edge technologies through research-driven design and motion.
+        </p>
+      </motion.div>
 
-              {/* Metrics */}
-              {selectedProject.metrics && (
-                <div>
-                  <h4 className="text-lg font-semibold text-white mb-3">Key Achievements</h4>
-                  <div className="space-y-2">
-                    {Object.entries(selectedProject.metrics).map(([key, value]) => (
-                      <motion.div
-                        key={key}
-                        className="flex justify-between items-center bg-gray-700/30 rounded-lg p-3"
-                        whileHover={{ backgroundColor: "rgba(20, 184, 166, 0.1)" }}
-                      >
-                        <span className="text-gray-300">{key}</span>
-                        <span className="text-teal-400 font-bold text-lg">{value}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div
+        ref={carouselRef}
+        className="relative mt-16 w-full"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => cursorOffset.set(0)}
+      >
+        <motion.div
+          className="pointer-events-none absolute inset-x-4 top-1/2 z-0 -translate-y-1/2 rounded-full bg-gradient-to-r from-white/[0.08] via-transparent to-white/[0.08] blur-3xl"
+          style={{ opacity: 0.7, x: cursorOffset }}
+        />
+
+        <div className="grid gap-x-8 gap-y-24 md:grid-cols-2 lg:grid-cols-3">
+          {projects.map((project, index) => (
+            <Card key={project.id} project={project} index={index} />
+          ))}
+        </div>
+      </div>
     </section>
   );
 };
