@@ -31,7 +31,7 @@ const App = () => {
       gestureDirection: 'vertical',
       smooth: true,
        lerp: 0.07,   
-      mouseMultiplier: 2,
+      mouseMultiplier: 2.3,
       smoothWheel: true,
       smoothTouch: false,
       touchMultiplier: 2,
